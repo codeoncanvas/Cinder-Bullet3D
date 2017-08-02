@@ -8,7 +8,7 @@
 
 #pragma once
 
-#include <boost/signals2.hpp>
+#include "cinder/Signals.h"
 
 #include "Cinder-Bullet3D/Common.h"
 #include "Cinder-Bullet3D/RigidBody.h"
@@ -21,7 +21,8 @@ typedef std::shared_ptr<class Context>								ContextRef;
 typedef std::shared_ptr<class PhysicsDebugRenderable>				DebugRendererRef;
 typedef std::pair<const btRigidBody*, const btRigidBody*>			CollisionPair;
 typedef std::set<CollisionPair>										CollisionPairs;
-typedef boost::signals2::signal<void(btRigidBody*, btRigidBody*)>	CollisionSignal;
+typedef ci::signals::Signal<void(btRigidBody*, btRigidBody*)>       CollisionSignal;
+typedef ci::signals::Connection                                     CollisionSignalConnection;
 typedef std::function<void(btRigidBody*, btRigidBody*)>				CollisionFunc;
 	
 struct RayResult {
@@ -252,17 +253,17 @@ private:
 	
 	// Actual Collision Signal Dispatchers
 	inline void collisionBegin( btRigidBody* pBody0, btRigidBody* pBody1 )
-	{ mCollisionBegin( pBody0, pBody1 ); }
+	{ mCollisionBegin.emit( pBody0, pBody1 ); }
 	inline void collisionEnd( btRigidBody* pBody0, btRigidBody* pBody1 )
-	{ mCollisionEnd( pBody0, pBody1 ); }
+	{ mCollisionEnd.emit( pBody0, pBody1 ); }
 	
 public:
 	//! Interface to add Collision Begin Event Signal
-	inline boost::signals2::connection addCollisionBeginSignal( CollisionFunc collisionBeginFunc )
+    inline CollisionSignalConnection addCollisionBeginSignal( CollisionFunc collisionBeginFunc )
 	{ return mCollisionBegin.connect( collisionBeginFunc ); }
 	
 	//! Interface to add Collision End Event Signal
-	inline boost::signals2::connection addCollisionEndSignal( CollisionFunc collisionEndFunc )
+	inline CollisionSignalConnection addCollisionEndSignal( CollisionFunc collisionEndFunc )
 	{ return mCollisionEnd.connect( collisionEndFunc ); }
 };
 	
